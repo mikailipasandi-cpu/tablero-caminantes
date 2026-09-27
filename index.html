@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>100 CAMINANTES DICEN</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    margin: 0;
+    background: #dff5ff;
+    overflow: hidden;
+}
+
+.juego {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+}
+
+/* =========================
+   MARCADOR
+========================= */
+
+.marcador {
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.equipo {
+    width: 300px;
+    padding: 12px 20px;
+    border-radius: 15px;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.equipo span {
+    display: block;
+    font-size: 34px;
+    margin-top: 4px;
+}
+
+.equipo.azul {
+    background: #0756a8;
+}
+
+.equipo.rojo {
+    background: #e53935;
+}
+
+/* =========================
+   TURNO
+========================= */
+
+.turno {
+    padding: 10px 30px;
+    border-radius: 12px;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+.azul-turno {
+    background: #0756a8;
+}
+
+.rojo-turno {
+    background: #e53935;
+}
+
+/* =========================
+   NÚMERO DE PREGUNTA
+========================= */
+
+.numero-pregunta {
+    width: 100px;
+    height: 65px;
+    background: white;
+    border: 5px solid #0756a8;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 38px;
+    font-weight: bold;
+    color: #0756a8;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* =========================
+   TABLERO
+========================= */
+
+.tablero {
+    width: 100%;
+    max-width: 950px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.respuesta {
+    height: 62px;
+    background: white;
+    border: 4px solid #0756a8;
+    border-radius: 12px;
+
+    display: grid;
+    grid-template-columns: 130px 1fr 130px;
+
+    align-items: center;
+
+    overflow: hidden;
+
+    cursor: pointer;
+
+    box-shadow: 0 3px 7px rgba(0,0,0,0.15);
+
+    transition: 0.2s;
+}
+
+.respuesta:hover {
+    transform: scale(1.01);
+}
+
+.respuesta.oculta {
+    background: #29a9e8;
+}
+
+.respuesta.oculta .puntaje,
+.respuesta.oculta .texto-respuesta,
+.respuesta.oculta .personas {
+    visibility: hidden;
+}
+
+.respuesta.oculta::before {
+    content: "?";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 38px;
+    font-weight: bold;
+}
+
+.puntaje {
+    font-size: 26px;
+    font-weight: bold;
+    color: #0756a8;
+    text-align: center;
+}
+
+.texto-respuesta {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    color: #0756a8;
+}
+
+.personas {
+    font-size: 22px;
+    font-weight: bold;
+    color: #0756a8;
+    text-align: center;
+}
+
+/* =========================
+   BOTONES
+========================= */
+
+.botones {
+    width: 100%;
+    max-width: 950px;
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+button {
+    border: none;
+    border-radius: 12px;
+    padding: 15px 10px;
+
+    color: white;
+    font-size: 17px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+
+    transition: 0.2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+}
+
+.btn-incorrecto {
+    background: #e53935;
+}
+
+.btn-correcto {
+    background: #28a745;
+}
+
+.btn-turno {
+    background: #0756a8;
+}
+
+.btn-siguiente {
+    background: #29a9e8;
+}
+
+.btn-reiniciar {
+    background: #555;
+}
+
+/* =========================
+   PANTALLA RESULTADO
+========================= */
+
+.pantalla-resultado {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    display: none;
+
+    justify-content: center;
+    align-items: center;
+
+    z-index: 9999;
+}
+
+.pantalla-resultado.correcto {
+    display: flex;
+    background: rgba(40, 167, 69, 0.96);
+}
+
+.pantalla-resultado.incorrecto {
+    display: flex;
+    background: rgba(229, 57, 53, 0.96);
+}
+
+.mensaje-resultado {
+    color: white;
+    font-size: 80px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 700px) {
+
+    body {
+        overflow: auto;
+    }
+
+    .juego {
+        height: auto;
+        min-height: 100vh;
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .marcador {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .equipo {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .turno {
+        order: 3;
+    }
+
+    .tablero {
+        gap: 6px;
+    }
+
+    .respuesta {
+        height: 55px;
+        grid-template-columns: 80px 1fr 80px;
+    }
+
+    .puntaje {
+        font-size: 20px;
+    }
+
+    .texto-respuesta {
+        font-size: 18px;
+    }
+
+    .personas {
+        font-size: 18px;
+    }
+
+    .botones {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    button {
+        font-size: 15px;
+    }
+
+    .mensaje-resultado {
+        font-size: 55px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="juego">
+
+    <!-- =========================
+         MARCADOR
+    ========================== -->
+
+    <div class="marcador">
+
+        <div class="equipo azul">
+            🔵 EQUIPO AZUL
+            <span id="puntosAzul">0</span>
+        </div>
+
+        <div id="turnoActual" class="turno azul-turno">
+            TURNO: 🔵 EQUIPO AZUL
+        </div>
+
+        <div class="equipo rojo">
+            🔴 EQUIPO ROJO
+            <span id="puntosRojo">0</span>
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         NÚMERO DE PREGUNTA
+    ========================== -->
+
+    <div class="numero-pregunta">
+        <span id="numeroPregunta">1</span>
+    </div>
+
+
+    <!-- =========================
+         TABLERO
+    ========================== -->
+
+    <div class="tablero">
+
+        <div
+            class="respuesta oculta"
+            id="respuesta-0"
+            onclick="alternarRespuesta(0)"
+        >
+            <div class="puntaje" id="puntaje0">300</div>
+            <div class="texto-respuesta" id="respuesta0">Pendiente</div>
+            <div class="personas" id="personas0">0</div>
+        </div>
+
+        <div
+            class="respuesta oculta"
+            id="respuesta-1"
+            onclick="alternarRespuesta(1)"
+        >
+            <div class="puntaje" id="puntaje1">250</div>
+            <div class="texto-respuesta" id="respuesta1">Pendiente</div>
+            <div class="personas" id="personas1">0</div>
+        </div>
+
+        <div
+            class="respuesta oculta"
+            id="respuesta-2"
+            onclick="alternarRespuesta(2)"
+        >
+            <div class="puntaje" id="puntaje2">200</div>
+            <div class="texto-respuesta" id="respuesta2">Pendiente</div>
+            <div class="personas" id="personas2">0</div>
+        </div>
+
+        <div
+            class="respuesta oculta"
+            id="respuesta-3"
+            onclick="alternarRespuesta(3)"
+        >
+            <div class="puntaje" id="puntaje3">150</div>
+            <div class="texto-respuesta" id="respuesta3">Pendiente</div>
+            <div class="personas" id="personas3">0</div>
+        </div>
+
+        <div
+            class="respuesta oculta"
+            id="respuesta-4"
+            onclick="alternarRespuesta(4)"
+        >
+            <div class="puntaje" id="puntaje4">70</div>
+            <div class="texto-respuesta" id="respuesta4">Pendiente</div>
+            <div class="personas" id="personas4">0</div>
+        </div>
+
+        <div
+            class="respuesta oculta"
+            id="respuesta-5"
+            onclick="alternarRespuesta(5)"
+        >
+            <div class="puntaje" id="puntaje5">30</div>
+            <div class="texto-respuesta" id="respuesta5">Pendiente</div>
+            <div class="personas" id="personas5">0</div>
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         BOTONES
+    ========================== -->
+
+    <div class="botones">
+
+        <button
+            class="btn-incorrecto"
+            onclick="incorrecto()"
+        >
+            ❌ INCORRECTO
+        </button>
+
+        <button
+            class="btn-correcto"
+            onclick="correcto()"
+        >
+            ✅ CORRECTO
+        </button>
+
+        <button
+            class="btn-turno"
+            onclick="cambiarTurno()"
+        >
+            🔄 CAMBIAR TURNO
+        </button>
+
+        <button
+            class="btn-siguiente"
+            onclick="siguientePregunta()"
+        >
+            SIGUIENTE ➜
+        </button>
+
+        <button
+            class="btn-reiniciar"
+            onclick="reiniciarJuego()"
+        >
+            🔄 REINICIAR JUEGO
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     PANTALLA RESULTADO
+========================= -->
+
+<div id="pantallaResultado" class="pantalla-resultado">
+
+    <div
+        id="mensajeResultado"
+        class="mensaje-resultado"
+    ></div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   PREGUNTAS
+===================================================== */
+
+const preguntas = [
+
+    {
+        pregunta: "Si tuvieses que describir Caminantes, ¿cuál sería?",
+        respuestas: [
+            { respuesta: "divertido", puntaje: 300, personas: 6 },
+            { respuesta: "competitivo", puntaje: 250, personas: 6 },
+            { respuesta: "entretenido", puntaje: 200, personas: 5 },
+            { respuesta: "responsabilidad", puntaje: 150, personas: 2 },
+            { respuesta: "ruidoso", puntaje: 70, personas: 2 },
+            { respuesta: "epico", puntaje: 30, personas: 1 }
+        ]
+    },
+
+    {
+        pregunta: "En campamento, ¿cuál es tu comida favorita?",
+        respuestas: [
+            { respuesta: "fideos con queso", puntaje: 300, personas: 10 },
+            { respuesta: "arroz con salchicha", puntaje: 250, personas: 4 },
+            { respuesta: "hamburguesa", puntaje: 200, personas: 3 },
+            { respuesta: "milanesa frita", puntaje: 150, personas: 3 },
+            { respuesta: "panchos", puntaje: 70, personas: 2 },
+        ]
+    },
+
+    {
+        pregunta: "¿En qué Comunidad iniciaste?",
+        respuestas: [
+            { respuesta: "Champaqui", puntaje: 300, personas: 16 },
+            { respuesta: "Geusyios", puntaje: 250, personas: 6 },
+
+        ]
+    },
+
+    {
+        pregunta: "¿Qué es lo más común que pasa?",
+        respuestas: [
+            { respuesta: "que no te aburras", puntaje: 300, personas: 15 },
+            { respuesta: "tener responsabilidades y a la vez diversión", puntaje: 250, personas: 4 },
+            { respuesta: "nadie quiere que se suspenda", puntaje: 200, personas: 2 },
+            { respuesta: "mucho espiritu", puntaje: 150, personas: 1 },
+
+        ]
+    },
+
+    {
+        pregunta: "¿En qué progresión estás?",
+        respuestas: [
+            { respuesta: "Agua", puntaje: 300, personas: 12 },
+            { respuesta: "aire", puntaje: 250, personas: 4 },
+            { respuesta: "fuego", puntaje: 200, personas: 4 },
+            { respuesta: "tierra", puntaje: 150, personas: 2 },
+
+        ]
+    },
+
+    {
+        pregunta: "¿A qué edad ingresaste a la comu?",
+        respuestas: [
+            { respuesta: "15", puntaje: 300, personas: 0 },
+            { respuesta: "14", puntaje: 250, personas: 0 },
+            { respuesta: "16", puntaje: 200, personas: 0 },
+
+        ]
+    }
+
+];
+
+
+/* =====================================================
+   ESTADO DEL JUEGO
+===================================================== */
+
+let preguntaActual = 0;
+
+let puntosAzul = 0;
+let puntosRojo = 0;
+
+let turno = "azul";
+
+let respuestasReveladas = [];
+let puntosEntregados = [];
+
+
+/* =====================================================
+   CREAR ESTADO INICIAL
+===================================================== */
+
+function crearEstadoInicial() {
+
+    respuestasReveladas = [];
+
+    puntosEntregados = [];
+
+    for (let i = 0; i < preguntas.length; i++) {
+
+        respuestasReveladas.push(
+            [false, false, false, false, false, false]
+        );
+
+        puntosEntregados.push(
+            [false, false, false, false, false, false]
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   CARGAR PREGUNTA
+===================================================== */
+
+function cargarPregunta() {
+
+    document.getElementById("numeroPregunta").textContent =
+        preguntaActual + 1;
+
+    const datos = preguntas[preguntaActual];
+
+    for (let i = 0; i < 6; i++) {
+
+        document.getElementById("puntaje" + i).textContent =
+            datos.respuestas[i].puntaje;
+
+        document.getElementById("respuesta" + i).textContent =
+            datos.respuestas[i].respuesta;
+
+        document.getElementById("personas" + i).textContent =
+            datos.respuestas[i].personas;
+
+        const casilla =
+            document.getElementById("respuesta-" + i);
+
+        if (respuestasReveladas[preguntaActual][i]) {
+
+            casilla.classList.remove("oculta");
+
+        } else {
+
+            casilla.classList.add("oculta");
+
+        }
+
+    }
+
+}
+
+
+/* =====================================================
+   REVELAR / OCULTAR RESPUESTA
+===================================================== */
+
+function alternarRespuesta(numero) {
+
+    const casilla =
+        document.getElementById("respuesta-" + numero);
+
+    const estaRevelada =
+        respuestasReveladas[preguntaActual][numero];
+
+
+    /* OCULTAR */
+
+    if (estaRevelada) {
+
+        respuestasReveladas[preguntaActual][numero] = false;
+
+        casilla.classList.add("oculta");
+
+        return;
+
+    }
+
+
+    /* REVELAR */
+
+    respuestasReveladas[preguntaActual][numero] = true;
+
+    casilla.classList.remove("oculta");
+
+
+    /* ENTREGAR PUNTOS SOLO UNA VEZ */
+
+    if (!puntosEntregados[preguntaActual][numero]) {
+
+        const puntos =
+            preguntas[preguntaActual].respuestas[numero].puntaje;
+
+
+        if (turno === "azul") {
+
+            puntosAzul += puntos;
+
+        } else {
+
+            puntosRojo += puntos;
+
+        }
+
+
+        puntosEntregados[preguntaActual][numero] = true;
+
+        actualizarMarcador();
+
+    }
+
+}
+
+
+/* =====================================================
+   MARCADOR
+===================================================== */
+
+function actualizarMarcador() {
+
+    document.getElementById("puntosAzul").textContent =
+        puntosAzul;
+
+    document.getElementById("puntosRojo").textContent =
+        puntosRojo;
+
+}
+
+
+/* =====================================================
+   CORRECTO
+===================================================== */
+
+function correcto() {
+
+    mostrarResultado("correcto");
+
+}
+
+
+/* =====================================================
+   INCORRECTO
+===================================================== */
+
+function incorrecto() {
+
+    mostrarResultado("incorrecto");
+
+}
+
+
+/* =====================================================
+   PANTALLA RESULTADO
+===================================================== */
+
+function mostrarResultado(tipo) {
+
+    const pantalla =
+        document.getElementById("pantallaResultado");
+
+    const mensaje =
+        document.getElementById("mensajeResultado");
+
+
+    pantalla.className =
+        "pantalla-resultado " + tipo;
+
+
+    if (tipo === "correcto") {
+
+        mensaje.textContent = "¡CORRECTO!";
+
+    } else {
+
+        mensaje.textContent = "¡INCORRECTO!";
+
+    }
+
+
+    setTimeout(function() {
+
+        pantalla.className =
+            "pantalla-resultado";
+
+    }, 2000);
+
+}
+
+
+/* =====================================================
+   CAMBIAR TURNO
+===================================================== */
+
+function cambiarTurno() {
+
+    if (turno === "azul") {
+
+        turno = "rojo";
+
+    } else {
+
+        turno = "azul";
+
+    }
+
+    actualizarTurno();
+
+}
+
+
+/* =====================================================
+   ACTUALIZAR TURNO
+===================================================== */
+
+function actualizarTurno() {
+
+    const elemento =
+        document.getElementById("turnoActual");
+
+
+    if (turno === "azul") {
+
+        elemento.textContent =
+            "TURNO: 🔵 EQUIPO AZUL";
+
+        elemento.className =
+            "turno azul-turno";
+
+    } else {
+
+        elemento.textContent =
+            "TURNO: 🔴 EQUIPO ROJO";
+
+        elemento.className =
+            "turno rojo-turno";
+
+    }
+
+}
+
+
+/* =====================================================
+   SIGUIENTE PREGUNTA
+===================================================== */
+
+function siguientePregunta() {
+
+    preguntaActual++;
+
+    if (preguntaActual >= preguntas.length) {
+
+        preguntaActual = 0;
+
+    }
+
+    cargarPregunta();
+
+}
+
+
+/* =====================================================
+   REINICIAR JUEGO
+===================================================== */
+
+function reiniciarJuego() {
+
+    const confirmar =
+        confirm(
+            "¿Seguro que querés reiniciar todo el juego?"
+        );
+
+
+    if (!confirmar) {
+        return;
+    }
+
+
+    puntosAzul = 0;
+
+    puntosRojo = 0;
+
+    preguntaActual = 0;
+
+    turno = "azul";
+
+
+    crearEstadoInicial();
+
+    actualizarMarcador();
+
+    actualizarTurno();
+
+    cargarPregunta();
+
+}
+
+
+/* =====================================================
+   INICIO
+===================================================== */
+
+crearEstadoInicial();
+
+actualizarMarcador();
+
+actualizarTurno();
+
+cargarPregunta();
+
+</script>
+
+</body>
+</html>
+```
